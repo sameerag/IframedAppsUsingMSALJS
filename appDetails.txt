@@ -1,0 +1,15 @@
+
+MSALIframeSupportApp Application (client) ID: 6216ed4a-b6c4-4c4a-8feb-7b5aede89650
+Directory (tenant) ID: f3c9e581-96ad-4f1b-9527-0e71185cf5e7
+Object ID: a0bc7f7f-146a-4406-992c-13353741c89c
+Supported account types: All Microsoft account users
+Redirect URIs: 1 web, 0 public client
+Managed application in local directory: MSALIframeSupportApp
+
+
+"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=token&scope=Mail.Read%20openid%20profile&
+client_id=6216ed4a-b6c4-4c4a-8feb-7b5aede89650&
+redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fauth.html&
+state=a4a840f2-4da6-488e-b7af-0931de744407&nonce=9e6acbd7-491b-410f-81c2-07b87213519a&client_info=1&x-client-SKU=MSAL.JS&x-client-Ver=1.0.1&
+login_hint=sam%40samtest.onmicrosoft.com&login_req=4233f193-c792-40be-bfca-104243b13150&domain_req=f3c9e581-96ad-4f1b-9527-0e71185cf5e7&
+domain_hint=organizations&instance_aware=true&client-request-id=c126b538-e274-4d2e-9a53-ea01c2dede6f&response_mode=fragment"
