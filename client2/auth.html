@@ -6,6 +6,10 @@
     <body>
         <h1>MSAL Iframe Page</h1>
         <p>MSAL Iframe container</p>
-        <script type="text/javascript" src="./auth.js"></script>
+        <script type="text/javascript">
+            const urlHash = window.location.hash;
+            console.log(window.location.hash);
+            window.postMessage(urlHash, "http://localhost:8002/index.html");
+        </script>
     </body>
 </html>
