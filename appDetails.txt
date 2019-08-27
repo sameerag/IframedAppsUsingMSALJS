@@ -13,3 +13,27 @@ redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fauth.html&
 state=a4a840f2-4da6-488e-b7af-0931de744407&nonce=9e6acbd7-491b-410f-81c2-07b87213519a&client_info=1&x-client-SKU=MSAL.JS&x-client-Ver=1.0.1&
 login_hint=sam%40samtest.onmicrosoft.com&login_req=4233f193-c792-40be-bfca-104243b13150&domain_req=f3c9e581-96ad-4f1b-9527-0e71185cf5e7&
 domain_hint=organizations&instance_aware=true&client-request-id=c126b538-e274-4d2e-9a53-ea01c2dede6f&response_mode=fragment"
+
+
+/*
+// parent's end (Parent should have MSAL code OR "handler Code")
+window.addEventListener("message", receiveMessage, false);
+
+function receiveMessage(event) {
+  if (event.origin !== "http://localhost:8002")
+    return;
+
+  if (event.data === "make a consent call on my behalf") {
+    loginPopup() or acquireTokenPopup() / acquireTokenRedirect() or acquireTokenRedirect();
+    --> save the Original page in the cache (localStorage/sessionStorage)
+    --> consent/credential entry here
+    --> STS redirects here (full page response of App B on App A (B tookover A's display: http://localhost:<client_port>/auth.html)
+    --> Extract the "hash", cache the "hash" in the client_port (same storage - localStorage/sessionStorage)
+    --> window.location.href = <saved original page>
+  }
+
+  Problems with this approach:
+  Reloads the Homepage; Teams does not want this!!!
+  May be do popup instead of redirect but at the parent level??
+}
+*/

@@ -7,9 +7,7 @@ function receiveMessage(event) {
   if (event.origin !== "http://localhost:8002/auth.html")
 	return;
 
-  console.log(message);
-
-  document.body.style.backgroundColor = "teal";
+  console.log("Message: ", event.data);
 }
 
 
