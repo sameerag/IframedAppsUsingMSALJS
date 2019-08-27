@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPFx Single Sign On Redirect Page</title>
+    <script type="text/javascript" src="https://secure.aadcdn.microsoftonline-p.com/lib/1.0.16/js/adal.min.js"></script>
+    <script type="text/javascript">
+        // BEGIN: NEW MSAL CODE HERE
+        const urlHash = window.location.hash;
+        console.log(window.location.hash);
+        window.parent.postMessage(urlHash, "http://localhost:8002/index.html");
+        // END: NEW MSAL CODE HERE
+
+        var authContext;
+        var config = {
+            clientId: 'c58637bb-e2e1-4312-8a00-04b5ffcd3403',
+            navigateToLoginRequestUrl: true
+        };
+        function parseTokenFromUrl() {
+            try{
+                authContext = new AuthenticationContext(config);
+                var hashValue = window.location.hash;
+                if (!hashValue) {
+                    console.log("window.location.hash is null!");
+                }
+                authContext.handleWindowCallback();
+            } catch (err) {
+                console.log(err.message);
+            } finally {
+                // Attempt to navigate to original page if something fails. This code will only execute on a full page redirect.
+                if (window.parent === window) {
+                    if (!authContext) {
+                        window.location.href = window.location.origin;
+                    } else {
+                        window.location.href = authContext._getItem(authContext.CONSTANTS.STORAGE.LOGIN_REQUEST) || window.location.origin;
+                    }
+                }
+            }
+        }
+    </script>
+  </head>
+  <body onload="parseTokenFromUrl()">
+  </body>
+</html>
