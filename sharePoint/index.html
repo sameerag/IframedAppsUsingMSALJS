@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quickstart for MSAL JS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.4/bluebird.min.js"></script>
+    <script src="msalNew.js"></script>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="leftContainer">
+            <p id="WelcomeMessage">Welcome to the Microsoft Authentication Library For Javascript Quickstart</p>
+            <button id="SignIn" onclick="signIn()">Sign In</button>
+            <button id="ReadProfile" onclick="readProfile()">Read Profile</button>
+        </div>
+        <div class="rightContainer">
+            <pre id="json"></pre>
+        </div>
+    </div>
+    <script>
+
+    var msalConfig = {
+        auth: {
+            clientId: "6216ed4a-b6c4-4c4a-8feb-7b5aede89650",
+            authority: "https://login.microsoftonline.com/common",
+            validateAuthority: true,
+            redirectUri: "http://localhost:8002/auth.html"
+        },
+        cache: {
+            cacheLocation: "localStorage",
+            storeAuthStateInCookie: true
+        }
+    };
+
+    var loginRequest = {
+        scopes: ["openid", "profile", "User.Read"]
+    }
+
+    var silentLoginRequest = {
+        loginHint: "lahuey@microsoft.com",
+        scopes: ["6216ed4a-b6c4-4c4a-8feb-7b5aede89650"]
+    };
+
+    var tokenRequest = {
+        scopes: ["User.Read"]
+    };
+
+    var graphConfig = {
+        graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
+    };
+
+
+    var myMSALObj = new Msal.UserAgentApplication(msalConfig);
+    myMSALObj.handleRedirectCallback(authRedirectCallBack);
+
+    function signIn() {
+        // Would normally use in SP as we already have an AAD cookie
+        // myMSALObj.acquireTokenSilent(silentLoginRequest)
+        myMSALObj.loginPopup(loginRequest)
+            .then(function (loginResponse) {
+                //Login Success
+                console.log(loginResponse);
+                showWelcomeMessage();
+                acquireTokenSilentAndCallMSGraph(graphConfig.graphMeEndpoint, tokenRequest);
+            }).catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    function acquireTokenSilentAndCallMSGraph(endpoint, request) {
+        myMSALObj.acquireTokenSilent(request).then(function (tokenResponse) {
+            console.log("acquireTokenSilent scopes: ", tokenResponse.scopes);
+            callMSGraph(endpoint, tokenResponse.accessToken, graphAPICallback);
+        }).catch(function (error) {
+            console.log(error);
+            // Call acquireTokenPopup (popup window) in case of acquireTokenSilent failure due to consent or interaction required ONLY
+            if (requiresInteraction(error.errorCode)) {
+                myMSALObj.acquireTokenPopup(request).then(function (tokenResponse) {
+                    callMSGraph(endpoint, tokenResponse.accessToken, graphAPICallback);
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            }
+        });
+    }
+
+    function callMSGraph(theUrl, accessToken, callback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200)
+                callback(JSON.parse(this.responseText));
+        }
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+        xmlHttp.send();
+    }
+
+    function graphAPICallback(data) {
+        document.getElementById("json").innerHTML = JSON.stringify(data, null, 2);
+    }
+
+    function showWelcomeMessage() {
+        var divWelcome = document.getElementById('WelcomeMessage');
+        divWelcome.innerHTML = 'Welcome ' + myMSALObj.getAccount().userName + " to Microsoft Graph API";
+        var loginbutton = document.getElementById('SignIn');
+        loginbutton.innerHTML = 'Sign Out';
+        loginbutton.setAttribute('onclick', 'signOut();');
+    }
+
+    function readProfile() {
+        acquireTokenSilentAndCallMSGraph(graphConfig.graphMeEndpoint, tokenRequest);
+    }
+
+    function signOut() {
+        myMSALObj.logout();
+    }
+
+    function authRedirectCallBack(error, response) {
+        if (error) {
+            console.log(error);
+        } else {
+            if (response.tokenType === "id_token") {
+                showWelcomeMessage();
+                acquireTokenRedirectAndCallMSGraph(graphConfig.graphMeEndpoint, loginRequest);
+            } else if (response.tokenType === "access_token") {
+                callMSGraph(graphConfig.graphMeEndpoint, response.accessToken, graphAPICallback);
+            } else {
+                console.log("token type is:" + response.tokenType);
+            }
+        }
+    }
+
+    function requiresInteraction(errorMessage) {
+        if (!errorMessage || !errorMessage.length) {
+            return false;
+        }
+
+        console.log("requiresinteraction is:" + errorMessage );
+        return errorMessage.indexOf("consent_required") !== -1 ||
+            errorMessage.indexOf("interaction_required") !== -1 ||
+            errorMessage.indexOf("login_required") !== -1 ;
+    }
+
+    // Browser check variables
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf('MSIE ');
+    var msie11 = ua.indexOf('Trident/');
+    var msedge = ua.indexOf('Edge/');
+    var isIE = msie > 0 || msie11 > 0;
+    var isEdge = msedge > 0;
+
+    //If you support IE, our recommendation is that you sign-in using Redirect APIs
+    //If you as a developer are testing using Edge InPrivate mode, please add "isEdge" to the if check
+    if (!isIE) {
+        if (myMSALObj.getAccount()) {// avoid duplicate code execution on page load in case of iframe and popup window.
+            showWelcomeMessage();
+            acquireTokenPopupAndCallMSGraph(graphConfig.graphMeEndpoint, loginRequest);
+        }
+    }
+    else {
+        document.getElementById("SignIn").onclick = function () {
+            myMSALObj.loginRedirect(loginRequest);
+        };
+
+        document.getElementById("ReadProfile").onclick = function () {
+            readProfile();
+        };
+
+
+        if (myMSALObj.getAccount() && !myMSALObj.isCallback(window.location.hash)) {// avoid duplicate code execution on page load in case of iframe and popup window.
+            showWelcomeMessage();
+            acquireTokenRedirectAndCallMSGraph(graphConfig.graphMeEndpoint, loginRequest);
+        }
+    }
+</script>
+</body>
+</html>

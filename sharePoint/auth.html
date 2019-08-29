@@ -4,12 +4,6 @@
     <title>SPFx Single Sign On Redirect Page</title>
     <script type="text/javascript" src="https://secure.aadcdn.microsoftonline-p.com/lib/1.0.16/js/adal.min.js"></script>
     <script type="text/javascript">
-        // BEGIN: NEW MSAL CODE HERE
-        const urlHash = window.location.hash;
-        console.log(window.location.hash);
-        window.parent.postMessage(urlHash, "http://localhost:8002/index.html");
-        // END: NEW MSAL CODE HERE
-
         var authContext;
         var config = {
             clientId: 'c58637bb-e2e1-4312-8a00-04b5ffcd3403',

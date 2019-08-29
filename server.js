@@ -25,7 +25,13 @@ const client2_server = http.createServer((req, res) => {
 }).listen(client_port2, hostname, () => {
   console.log(`Client2 running at http://${hostname}:${client_port2}/`);
 });
-
+/*
+const sharepoint_server = http.createServer((req, res) => {
+  serveAsset('sharePoint', req.url, res)
+}).listen(client_port2, hostname, () => {
+  console.log(`SharePoint running at http://${hostname}:${client_port2}/`);
+});
+*/
 function serveAsset(rootPath, url, res) {
     // default root route to index.html in the folder
     if (url === '/') url = 'index.html';
